@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>下载应用</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .container {
+            width: 90%;
+            max-width: 360px;
+            background: #fff;
+            border-radius: 10px;
+            padding: 30px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .loading-message {
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .download-button {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 0;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 8px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            width: 100%;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+        .button-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .icon-apple, .icon-android {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="loading-message" id="loading-message">
+            正在为您检测设备并尝试跳转...
+        </p>
+
+        <a id="main-download-button" href="#" class="download-button">
+            <span class="button-icon icon-apple"></span> <span class="button-icon icon-android"></span> <span class="button-text">立即下载</span>
+        </a>
+    </div>
+
+    <script>
+        const APP_STORE_LINKS = {
+            ios: 'https://apps.apple.com/us/app/dailyshort/id6478948519', // 替换为你的 iOS 应用商店链接
+            android: 'https://play.google.com/store/apps/details?id=com.dailyshort.androidapp', // 替换为你的 Android 应用商店链接
+            // 如果桌面版有其他通用下载页，可以加在这里
+            // general: 'https://yourdomain.com/download-for-desktop'
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadingMessage = document.getElementById('loading-message');
+            const mainDownloadButton = document.getElementById('main-download-button');
+            const appleIcon = mainDownloadButton.querySelector('.icon-apple');
+            const androidIcon = mainDownloadButton.querySelector('.icon-android');
+            const buttonTextSpan = mainDownloadButton.querySelector('.button-text');
+
+            let jumped = false; // 标记是否已尝试跳转
+
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+            const tryRedirect = () => {
+                console.log(userAgent);
+                if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                    // iOS 设备
+                    if (APP_STORE_LINKS.ios) {
+                        window.location.href = APP_STORE_LINKS.ios;
+                        jumped = true;
+                    }
+                } else if (/android/i.test(userAgent)) {
+                    // Android 设备
+                    if (APP_STORE_LINKS.android) {
+                        window.location.href = APP_STORE_LINKS.android;
+                        jumped = true;
+                    }
+                }
+            };
+
+            // 立即尝试自动跳转
+            tryRedirect();
+            console.log(jumped);
+
+            // 设置一个短时间延迟（例如 1.5 秒），如果未跳转，则显示按钮
+            setTimeout(() => {
+                loadingMessage.style.display = 'none'; // 隐藏加载消息
+
+                if (!jumped) {
+                    // 如果没有自动跳转成功 (或者不是移动设备)
+                    mainDownloadButton.style.display = 'flex'; // 显示主下载按钮
+
+                    // 根据检测到的设备，更新按钮文本和图标
+                    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                        appleIcon.style.display = 'block';
+                        buttonTextSpan.textContent = 'App Store 下载';
+                        mainDownloadButton.href = APP_STORE_LINKS.ios; // 确保按钮链接正确
+                    } else if (/android/i.test(userAgent)) {
+                        androidIcon.style.display = 'block';
+                        buttonTextSpan.textContent = 'Google Play 下载';
+                        mainDownloadButton.href = APP_STORE_LINKS.android; // 确保按钮链接正确
+                    } else {
+                        // 桌面或其他设备，显示通用"立即下载"
+                        buttonTextSpan.textContent = '立即下载';
+                        // 如果有通用下载页链接，可以设置这里
+                        // mainDownloadButton.href = APP_STORE_LINKS.general || '#';
+                    }
+                }
+            }, 1500); // 1.5秒后判断是否需要显示备用方案
+        });
+    </script>
+</body>
+</html>
